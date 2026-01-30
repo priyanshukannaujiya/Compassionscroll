@@ -11,10 +11,10 @@ import L from 'leaflet';
 import { createClient } from '@supabase/supabase-js';
 
 // ===== CONFIG (UNCHANGED) =====
-const supabaseUrl = 'https://zstolmotbtwskczrakjy.supabase.co';
-const supabaseKey = 'sb_publishable_5_zDt027YlHtMfwQ2RieAA_iFBJa22S';
-const supabase = createClient(supabaseUrl, supabaseKey);
-const GEMINI_KEY = 'AIzaSyBKjHNtEZLuiYealX8N6LG9aTPMMixf1FE';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
+const GEMINI_KEY = import.meta.env.VITE_GEMINI_KEY;
+
 
 // ===== STYLES =====
 const styles = `

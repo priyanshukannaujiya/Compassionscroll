@@ -235,10 +235,10 @@ export default function App() {
     setSosLoading(true);
     navigator.geolocation.getCurrentPosition((pos) => {
         const msg = `SOS ALERT | Agent: ${user?.name}\nDivision: ${user?.city}\nGPS: https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
-        window.open(`https://wa.me/919372079707?text=${encodeURIComponent(msg)}`, '_blank');
+        window.open(`https://wa.me/+919820161114?text=${encodeURIComponent(msg)}`, '_blank');
         setSosLoading(false); addKarma(15);
       }, () => {
-        window.open(`https://wa.me/+91 98201 61114?text=SOS ALERT: Manual Check-in from ${user?.city}`, '_blank');
+        window.open(`https://wa.me/+919820161114?text=SOS ALERT: Manual Check-in from ${user?.city}`, '_blank');
         setSosLoading(false);
     });
   };
@@ -253,7 +253,7 @@ export default function App() {
       date: "JAN 2026", readTime: "2 min", content: postForm.desc,
       bio: postForm.type === 'adoption' ? postForm.desc : null,
       age: postForm.type === 'adoption' ? postForm.age : null,
-      liked: false, comments: [], status: "Active", phone: "919372079707", category: "FIELD REPORT"
+      liked: false, comments: [], status: "Active", phone: "91+919820161114", category: "FIELD REPORT"
     };
     setFeed([newEntry, ...feed]); setIsModalOpen(false);
     setPostForm({ title: '', desc: '', type: 'news', image: null, age: 'Junior' });

@@ -238,7 +238,7 @@ export default function App() {
         window.open(`https://wa.me/919372079707?text=${encodeURIComponent(msg)}`, '_blank');
         setSosLoading(false); addKarma(15);
       }, () => {
-        window.open(`https://wa.me/919372079707?text=SOS ALERT: Manual Check-in from ${user?.city}`, '_blank');
+        window.open(`https://wa.me/+91 98201 61114?text=SOS ALERT: Manual Check-in from ${user?.city}`, '_blank');
         setSosLoading(false);
     });
   };

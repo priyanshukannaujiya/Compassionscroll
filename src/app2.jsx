@@ -14,14 +14,12 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
 const GEMINI_KEY = import.meta.env.VITE_GEMINI_KEY;
-
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // ===== STYLES =====
 const styles = `
 .night-vision { filter: sepia(100%) hue-rotate(90deg) brightness(0.8) contrast(1.2); background:#001a00;}
 .night-vision * { color:#00ff00 !important; border-color:#00ff0033 !important;}
-.scan-line{width:100%;height:2px;background:#10b981;position:absolute;animation:scan 2s linear infinite;box-shadow:0 0 15px #10b981;}
-@keyframes scan{0%{top:0}100%{top:100%}}
 `;
 
 delete L.Icon.Default.prototype._getIconUrl;
@@ -41,10 +39,10 @@ const IntelManual = () => (
     ].map((x, i) => (
       <motion.div
         key={i}
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: i * 0.1 }}
         whileHover={{ scale: 1.02 }}
+        transition={{ delay: i * 0.08 }}
         className="bg-white p-4 rounded-2xl border shadow flex gap-3"
       >
         {x.i}
@@ -107,11 +105,17 @@ const TrophyRoom = () => (
   </div>
 );
 
-// ===== SCANNER (LOGIC SAME, UI ANIMATED) =====
+// ===== SCANNER =====
 const ScannerView = ({ onScanComplete, userLoc }) => {
   const [img, setImg] = useState(null);
   const [loading, setLoading] = useState(false);
   const [res, setRes] = useState(null);
+
+  const safeParseJSON = (text) => {
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error("Invalid AI response");
+    return JSON.parse(match[0]);
+  };
 
   const scan = async (file) => {
     setLoading(true);
@@ -146,11 +150,10 @@ Otherwise return ONLY:
 
       const data = await response.json();
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-      const parsed = JSON.parse(text.match(/\{[\s\S]*\}/)[0]);
+      const parsed = safeParseJSON(text);
 
       if (!parsed.is_animal) {
         setRes({ breed: "Not an animal", status: "Invalid scan", details: "Upload a real animal image." });
-        setLoading(false);
         return;
       }
 
@@ -164,8 +167,11 @@ Otherwise return ONLY:
         location: userLoc.join(',')
       }]);
 
-    } catch (e) { alert(e.message); }
-    finally { setLoading(false); }
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return !img ? (
@@ -251,9 +257,9 @@ export default function App() {
           <AnimatePresence mode="wait">
             <motion.div
               key={tab}
-              initial={{ opacity: 0, x: 40 }}
+              initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -40 }}
+              exit={{ opacity: 0, x: -30 }}
               transition={{ duration: 0.25 }}
             >
 
@@ -270,14 +276,14 @@ export default function App() {
               {tab === 'trophy' && <TrophyRoom />}
 
               {tab === 'ops' && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-2xl overflow-hidden shadow">
-                  <MapContainer center={loc} zoom={13} style={{ height: '60vh' }}>
+                <div className="w-full h-[50vh] rounded-2xl overflow-hidden shadow-lg">
+                  <MapContainer center={loc} zoom={13} className="w-full h-full">
                     <TileLayer url={night
                       ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                       : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"} />
                     <Marker position={loc}><Popup>My Position</Popup></Marker>
                   </MapContainer>
-                </motion.div>
+                </div>
               )}
 
             </motion.div>

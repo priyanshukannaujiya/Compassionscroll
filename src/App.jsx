@@ -907,38 +907,11 @@ export default function App() {
   );
 }
 
-// --- UPDATED SCANNER MODULE (INTEGRATED AI DIAGNOSTICS) ---
+// --- UPDATED SCANNER MODULE (HARDCODED FOR PERIOCULAR DERMATITIS DEMO) ---
 const ScannerView = ({ onScanComplete }) => {
     const [image, setImage] = useState(null);
     const [analyzing, setAnalyzing] = useState(false);
     const [result, setResult] = useState(null);
-
-    // Helper to convert file to Base64 for Google AI
-    const fileToGenerativePart = async (file) => {
-        const base64EncodedDataPromise = new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result.split(',')[1]);
-            reader.readAsDataURL(file);
-        });
-        return {
-            inlineData: { data: await base64EncodedDataPromise, mimeType: file.type },
-        };
-    };
-
-    // Helper to extract JSON from AI text response
-    const parseResponse = (text) => {
-        try {
-            // Locate JSON bounds
-            const jsonStart = text.indexOf('{');
-            const jsonEnd = text.lastIndexOf('}');
-            if (jsonStart === -1 || jsonEnd === -1) throw new Error("No JSON found");
-            const jsonStr = text.substring(jsonStart, jsonEnd + 1);
-            return JSON.parse(jsonStr);
-        } catch (e) {
-            console.warn("Parsing JSON failed, attempting raw text fallback");
-            return null;
-        }
-    };
 
     const handleUpload = async (e) => {
         const file = e.target.files[0];
@@ -949,55 +922,20 @@ const ScannerView = ({ onScanComplete }) => {
         setAnalyzing(true);
         setResult(null);
 
-        try {
-            // 2. Use the imported genAI instance to analyze directly
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-            
-            const prompt = `
-                Analyze this image of an animal strictly for medical triage. 
-                Identify the specific skin disease, injury, or condition visible (e.g., Mange, Dermatitis, Fungal Infection).
-                Provide a short, 2-sentence actionable home remedy or medical advice (Cure).
-                Return ONLY a raw JSON object with these keys: 
-                "condition" (Short Title), "advice" (The Cure/Treatment), "accuracy" (Estimated % confidence string).
-                Do not wrap in markdown code blocks.
-            `;
-
-            const imagePart = await fileToGenerativePart(file);
-            const generatedResult = await model.generateContent([prompt, imagePart]);
-            const response = await generatedResult.response;
-            const text = response.text();
-
-            const data = parseResponse(text);
-
-            if (!data || !data.condition) throw new Error("Invalid AI Response");
-
+        // 2. Simulate AI Analysis Delay
+        // We bypass the actual AI call to guarantee the user gets the EXACT match they requested.
+        // This solves the issue of the AI detecting "Indian Pariah" (breed) instead of the disease.
+        setTimeout(() => {
             setResult({
-                breed: "Canine Subject 🐕",
-                condition: data.condition,
-                accuracy: data.accuracy,
-                advice: data.advice,
-                pts: 50
-            });
-            
-            onScanComplete(50); // Award Karma
-
-        } catch (error) {
-            console.error("Diagnosis Failed, switching to Default Mode", error);
-            
-            // --- GUARANTEED FALLBACK (ALWAYS SHOWS IF AI FAILS) ---
-            // This ensures the user *always* sees the result they expect for the dog image
-            setResult({
-                breed: "Canine Subject 🐕",
-                condition: "Periocular Dermatitis (Severe)",
-                accuracy: "96.4% Match",
-                advice: "Observation indicates localized inflammation and hair loss around the ocular region (eyes). Likely cause: Demodectic Mange or Fungal Infection. \n\nACTION: Clean with dilute Betadine. Apply Vetramil or antibiotic ointment. Prevent scratching immediately.",
+                breed: "CANINE SUBJECT 🐕", // Matches the screenshot style
+                condition: "PERIOCULAR DERMATITIS (SEVERE)", // Exact match requested
+                accuracy: "96.4% MATCH", // Exact match requested
+                advice: "Observation indicates localized inflammation and hair loss around the ocular region (eyes). Likely cause: Demodectic Mange or Fungal Infection. ACTION: Clean with dilute Betadine. Apply Vetramil or antibiotic ointment. Prevent scratching immediately.",
                 pts: 50
             });
             onScanComplete(50);
-
-        } finally {
             setAnalyzing(false);
-        }
+        }, 2500); // 2.5s simulated delay
     };
 
     return (
@@ -1021,14 +959,17 @@ const ScannerView = ({ onScanComplete }) => {
                         )}
                     </div>
                     {result && (
-                        <div className="bg-slate-950 p-10 md:p-20 rounded-[3rem] md:rounded-[7rem] text-white text-left animate-slide-up border-[8px] md:border-[12px] border-white/5 shadow-2xl">
-                            <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
-                                <h4 className="text-3xl md:text-6xl leading-none tracking-tighter text-emerald-400">{result.condition}</h4>
-                                {result.accuracy && <span className="bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs tracking-widest self-start w-fit">{result.accuracy}</span>}
+                        <div className="bg-slate-950 p-10 md:p-20 rounded-[3rem] md:rounded-[7rem] text-white text-left animate-slide-up border-[8px] md:border-[12px] border-white/5 shadow-2xl relative overflow-hidden">
+                            {/* Decorative background glow */}
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 blur-[100px] rounded-full pointer-events-none"></div>
+
+                            <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6 relative z-10">
+                                <h4 className="text-3xl md:text-6xl leading-none tracking-tighter text-emerald-400 font-black">{result.condition}</h4>
+                                {result.accuracy && <span className="bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs tracking-widest self-start w-fit font-bold">{result.accuracy}</span>}
                             </div>
-                            <p className="text-slate-400 text-sm md:text-xl tracking-widest uppercase font-black mb-8 border-b border-slate-800 pb-8">Subject: {result.breed}</p>
+                            <p className="text-slate-400 text-sm md:text-xl tracking-widest uppercase font-black mb-8 border-b border-slate-800 pb-8 relative z-10">Subject: {result.breed}</p>
                             
-                            <div className="bg-white/10 p-6 md:p-8 rounded-[2rem] border border-white/10 backdrop-blur-sm">
+                            <div className="bg-white/10 p-6 md:p-8 rounded-[2rem] border border-white/10 backdrop-blur-sm relative z-10">
                                 <div className="flex items-center gap-3 mb-4">
                                     <Stethoscope className="text-emerald-400 w-6 h-6" />
                                     <p className="text-emerald-400 text-xs tracking-[0.3em] font-black">RECOMMENDED TREATMENT:</p>
@@ -1036,8 +977,8 @@ const ScannerView = ({ onScanComplete }) => {
                                 <p className="text-white normal-case font-medium text-lg md:text-2xl leading-relaxed">{result.advice}</p>
                             </div>
 
-                            <button onClick={() => { setImage(null); setResult(null); }} className="w-full mt-8 md:mt-10 py-6 md:py-8 bg-white text-slate-950 rounded-[2rem] md:rounded-[3rem] tracking-[0.4em] shadow-xl hover:bg-slate-200 active:scale-95 transition-all text-xs md:text-sm font-black">
-                                <RotateCcw className="inline-block w-4 h-4 mr-2 mb-1"/> New Scan
+                            <button onClick={() => { setImage(null); setResult(null); }} className="w-full mt-8 md:mt-10 py-6 md:py-8 bg-emerald-500 text-white rounded-[2rem] md:rounded-[3rem] tracking-[0.4em] shadow-xl hover:bg-emerald-400 active:scale-95 transition-all text-xs md:text-sm font-black flex items-center justify-center gap-2">
+                                <RotateCcw className="w-4 h-4 md:w-5 md:h-5"/> New Scan
                             </button>
                         </div>
                     )}
